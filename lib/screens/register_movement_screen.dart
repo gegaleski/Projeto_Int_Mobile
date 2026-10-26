@@ -25,6 +25,7 @@ class _RegisterMovementScreenState
   final _descriptionController = TextEditingController();
 
   String _type = 'Transferência';
+  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -35,22 +36,54 @@ class _RegisterMovementScreenState
     super.dispose();
   }
 
-  void _saveMovement() {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _saveMovement() async {
+    if (!_formKey.currentState!.validate() || _isSaving) {
+      return;
+    }
 
-    MovementService.add(
-      Movement(
-        assetCode: widget.assetCode,
-        type: _type,
-        origin: _originController.text.trim(),
-        destination: _destinationController.text.trim(),
-        responsible: _responsibleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        date: DateTime.now(),
-      ),
-    );
+    setState(() {
+      _isSaving = true;
+    });
 
-    Navigator.pop(context, true);
+    try {
+      await MovementService.add(
+        Movement(
+          assetCode: widget.assetCode,
+          type: _type,
+          origin: _originController.text.trim(),
+          destination: _destinationController.text.trim(),
+          responsible: _responsibleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          date: DateTime.now(),
+        ),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Movimentação salva com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao salvar movimentação: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
   }
 
   @override
@@ -72,6 +105,7 @@ class _RegisterMovementScreenState
               ),
             ),
             const SizedBox(height: 24),
+
             DropdownButtonFormField<String>(
               value: _type,
               decoration: const InputDecoration(
@@ -92,29 +126,62 @@ class _RegisterMovementScreenState
                   child: Text('Retorno de manutenção'),
                 ),
               ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _type = value);
-                }
-              },
+              onChanged: _isSaving
+                  ? null
+                  : (value) {
+                      if (value != null) {
+                        setState(() {
+                          _type = value;
+                        });
+                      }
+                    },
             ),
+
             const SizedBox(height: 16),
-            _field(_originController, 'Local de origem'),
-            _field(_destinationController, 'Local de destino'),
-            _field(_responsibleController, 'Responsável'),
+
+            _field(
+              _originController,
+              'Local de origem',
+            ),
+
+            _field(
+              _destinationController,
+              'Local de destino',
+            ),
+
+            _field(
+              _responsibleController,
+              'Responsável',
+            ),
+
             _field(
               _descriptionController,
               'Observações',
               required: false,
               maxLines: 3,
             ),
+
             const SizedBox(height: 20),
+
             SizedBox(
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: _saveMovement,
-                icon: const Icon(Icons.save_outlined),
-                label: const Text('Salvar movimentação'),
+                onPressed: _isSaving ? null : _saveMovement,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save_outlined),
+                label: Text(
+                  _isSaving
+                      ? 'Salvando...'
+                      : 'Salvar movimentação',
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2457A7),
                   foregroundColor: Colors.white,
@@ -138,14 +205,17 @@ class _RegisterMovementScreenState
       child: TextFormField(
         controller: controller,
         maxLines: maxLines,
+        enabled: !_isSaving,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
         ),
         validator: (value) {
-          if (required && (value == null || value.trim().isEmpty)) {
+          if (required &&
+              (value == null || value.trim().isEmpty)) {
             return 'Preencha este campo.';
           }
+
           return null;
         },
       ),
