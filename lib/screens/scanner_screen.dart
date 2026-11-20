@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -306,7 +305,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     final payload = _parseQrContent(rawValue);
     final code = _getEquipmentCode(payload);
 
-    // Primeiro verifica se o equipamento já existe na API Django.
+    // Primeiro verifica automaticamente se o equipamento já existe na API Django.
     if (code.isNotEmpty) {
       final existing = await _findExistingEquipment(code);
 
@@ -451,37 +450,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
   }
 
-  Future<void> _testEquipmentLookup() async {
-    if (_processing) return;
-
-    _processing = true;
-
-    try {
-      await _controller.stop();
-
-      if (!mounted) return;
-
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const AssetDetailsScreen(
-            assetCode: 'LAB-2026-0148',
-          ),
-        ),
-      );
-    } finally {
-      _processing = false;
-
-      if (mounted) {
-        try {
-          await _controller.start();
-        } catch (_) {
-          // A câmera pode não estar disponível no momento.
-        }
-      }
-    }
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -551,18 +519,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   ),
                 ),
               ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton.icon(
-                onPressed: _testEquipmentLookup,
-                icon: const Icon(Icons.search),
-                label: const Text('Testar consulta de equipamento'),
-              ),
             ),
           ),
         ],

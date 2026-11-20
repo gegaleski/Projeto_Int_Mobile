@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../services/api_service.dart';
@@ -78,8 +77,7 @@ class _DashboardContent extends StatefulWidget {
   });
 
   @override
-  State<_DashboardContent> createState() =>
-      _DashboardContentState();
+  State<_DashboardContent> createState() => _DashboardContentState();
 }
 
 class _DashboardContentState extends State<_DashboardContent> {
@@ -174,9 +172,25 @@ class _DashboardContentState extends State<_DashboardContent> {
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF7F9FC),
-        title: const Text(
-          'LabControl',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/labcontrol_logo.png',
+              width: 42,
+              height: 42,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'LabControl',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF172B4D),
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -224,8 +238,7 @@ class _DashboardContentState extends State<_DashboardContent> {
                 FutureBuilder<Map<String, dynamic>>(
                   future: _dashboardFuture,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Padding(
                         padding: EdgeInsets.all(32),
                         child: Center(
@@ -244,15 +257,11 @@ class _DashboardContentState extends State<_DashboardContent> {
 
                     final data = snapshot.data!;
 
-                    final totalOrdens =
-                        data['totalOrdens'] as int;
+                    final totalOrdens = data['totalOrdens'] as int;
                     final abertas = data['abertas'] as int;
-                    final emAndamento =
-                        data['emAndamento'] as int;
-                    final concluidas =
-                        data['concluidas'] as int;
-                    final canceladas =
-                        data['canceladas'] as int;
+                    final emAndamento = data['emAndamento'] as int;
+                    final concluidas = data['concluidas'] as int;
+                    final canceladas = data['canceladas'] as int;
 
                     return Column(
                       children: [
@@ -261,8 +270,7 @@ class _DashboardContentState extends State<_DashboardContent> {
                             Expanded(
                               child: _MetricCard(
                                 title: 'Equipamentos',
-                                value:
-                                    '${data['totalEquipamentos']}',
+                                value: '${data['totalEquipamentos']}',
                                 icon: Icons.devices_outlined,
                                 color: const Color(0xFF2457A7),
                                 onTap: _openEquipmentList,
@@ -348,8 +356,7 @@ class _DashboardContentState extends State<_DashboardContent> {
                 _ActionCard(
                   icon: Icons.add_box_outlined,
                   title: 'Cadastrar equipamento',
-                  description:
-                      'Registre um novo ativo manualmente.',
+                  description: 'Registre um novo ativo manualmente.',
                   onTap: _openEquipmentRegistration,
                 ),
                 const SizedBox(height: 12),
@@ -363,8 +370,7 @@ class _DashboardContentState extends State<_DashboardContent> {
                 _ActionCard(
                   icon: Icons.assignment_outlined,
                   title: 'Ordens e movimentações',
-                  description:
-                      'Acompanhe os registros dos ativos.',
+                  description: 'Acompanhe os registros dos ativos.',
                   onTap: widget.onOpenOrders,
                 ),
                 const SizedBox(height: 24),
@@ -552,9 +558,8 @@ class _StatusSummary extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ...statuses.map((status) {
-            final percentage = total == 0
-                ? 0
-                : (status.count / total * 100).round();
+            final percentage =
+                total == 0 ? 0 : (status.count / total * 100).round();
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 14),

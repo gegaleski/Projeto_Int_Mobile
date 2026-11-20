@@ -17,7 +17,6 @@ class MovementService {
   }
 
   static Future<void> add(Movement movement) async {
-    // Salva a movimentação no banco de dados Django.
     await ApiService.registrarMovimentacao(
       codigoEquipamento: movement.assetCode,
       tipo: movement.type,
@@ -25,9 +24,9 @@ class MovementService {
       destino: movement.destination,
       responsavel: movement.responsible,
       descricao: movement.description,
+      novoStatus: movement.newStatus,
     );
 
-    // Atualiza a lista local após a confirmação da API.
     _movements.add(movement);
   }
 }

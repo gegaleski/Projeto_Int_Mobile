@@ -241,6 +241,12 @@ class _ServiceOrdersScreenState extends State<ServiceOrdersScreen> {
     int orderId,
     String currentStatus,
   ) async {
+    // Ordens concluídas ou canceladas não podem mais ser alteradas.
+    if (currentStatus == 'CONCLUIDA' ||
+        currentStatus == 'CANCELADA') {
+      return;
+    }
+
     const statuses = {
       'ABERTA': 'Aberta',
       'EM_ANDAMENTO': 'Em andamento',
@@ -742,20 +748,46 @@ class _ServiceOrdersScreenState extends State<ServiceOrdersScreen> {
                           color: Color(0xFF68758A),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: OutlinedButton.icon(
-                          onPressed: orderId == null
-                              ? null
-                              : () => _showStatusOptions(
-                                    orderId,
-                                    status,
-                                  ),
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Alterar status'),
+                      if (status == 'CONCLUIDA' ||
+                          status == 'CANCELADA') ...[
+                        const SizedBox(height: 12),
+                        const Align(
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.lock_outline,
+                                size: 16,
+                                color: Color(0xFF68758A),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Ordem finalizada. Não é possível alterar o status.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF68758A),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ] else ...[
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: OutlinedButton.icon(
+                            onPressed: orderId == null
+                                ? null
+                                : () => _showStatusOptions(
+                                      orderId,
+                                      status,
+                                    ),
+                            icon: const Icon(Icons.edit_outlined),
+                            label: const Text('Alterar status'),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

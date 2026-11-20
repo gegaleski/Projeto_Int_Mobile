@@ -6,6 +6,7 @@ class Movement {
   final String responsible;
   final String description;
   final DateTime date;
+  final String? newStatus;
 
   const Movement({
     required this.assetCode,
@@ -15,5 +16,6 @@ class Movement {
     required this.responsible,
     required this.description,
     required this.date,
+    this.newStatus,
   });
 }

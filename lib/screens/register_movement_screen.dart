@@ -25,7 +25,29 @@ class _RegisterMovementScreenState
   final _descriptionController = TextEditingController();
 
   String _type = 'Transferência';
+  String _newStatus = 'DISPONIVEL';
   bool _isSaving = false;
+
+  static const Map<String, String> _statusOptions = {
+    'DISPONIVEL': 'Disponível',
+    'EM_USO': 'Em uso',
+    'EM_MANUTENCAO': 'Em manutenção',
+    'INATIVO': 'Inativo',
+  };
+
+  bool get _isTransfer => _type == 'Transferência';
+
+  String get _automaticStatus {
+    if (_type == 'Envio para manutenção') {
+      return 'EM_MANUTENCAO';
+    }
+
+    if (_type == 'Retorno de manutenção') {
+      return 'DISPONIVEL';
+    }
+
+    return _newStatus;
+  }
 
   @override
   void dispose() {
@@ -55,6 +77,7 @@ class _RegisterMovementScreenState
           responsible: _responsibleController.text.trim(),
           description: _descriptionController.text.trim(),
           date: DateTime.now(),
+          newStatus: _automaticStatus,
         ),
       );
 
@@ -138,6 +161,46 @@ class _RegisterMovementScreenState
             ),
 
             const SizedBox(height: 16),
+
+            if (_isTransfer) ...[
+              DropdownButtonFormField<String>(
+                value: _newStatus,
+                decoration: const InputDecoration(
+                  labelText: 'Novo status do equipamento',
+                  border: OutlineInputBorder(),
+                ),
+                items: _statusOptions.entries.map((entry) {
+                  return DropdownMenuItem<String>(
+                    value: entry.key,
+                    child: Text(entry.value),
+                  );
+                }).toList(),
+                onChanged: _isSaving
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() {
+                            _newStatus = value;
+                          });
+                        }
+                      },
+              ),
+              const SizedBox(height: 16),
+            ] else ...[
+              InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Novo status automático',
+                  border: OutlineInputBorder(),
+                ),
+                child: Text(
+                  _statusOptions[_automaticStatus]!,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             _field(
               _originController,
